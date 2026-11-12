@@ -97,17 +97,11 @@ def complete(
 @router.post("/payouts/{transfer_id}/fail")
 def fail(transfer_id: str, body: FailIn, agent: User = Depends(agent_only), db: Session = Depends(get_db)):
     t = _load(db, transfer_id, agent)
-    # An agent can fail a payout they hold, or one still waiting in the queue.
-    if t.status == TransferStatus.IN_PROGRESS:
-        _transition(
-            db, t, from_status=TransferStatus.IN_PROGRESS, held_by=agent.id,
-            status=TransferStatus.REFUNDED, failure_reason=body.reason.strip(),
-        )
-    else:
-        _transition(
-            db, t, from_status=TransferStatus.PAYOUT_PENDING, held_by=None,
-            status=TransferStatus.REFUNDED, failure_reason=body.reason.strip(), agent_id=agent.id,
-        )
+    # Only the agent holding the payout (claimed, IN_PROGRESS) can fail it.
+    _transition(
+        db, t, from_status=TransferStatus.IN_PROGRESS, held_by=agent.id,
+        status=TransferStatus.REFUNDED, failure_reason=body.reason.strip(),
+    )
     funding = db.get(JournalTxn, t.funding_txn_id)
     txn = ledger.reverse_journal(
         db, funding, key=f"transfer:{t.id}:refund", kind="transfer_refund", memo=f"Refund {t.id}: {body.reason.strip()}"

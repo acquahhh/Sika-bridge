@@ -14,8 +14,9 @@ USD_RATES: dict[str, Decimal] = {
 }
 SPREAD = Decimal("0.01")
 FEE_RATE = Decimal("0.015")
-# Minimum fee in minor units of the *send* currency: 300 RWF, 3.00 GHS.
-MIN_FEE_MINOR: dict[str, int] = {"RWF": 300, "GHS": 300}
+# Minimum fee in minor units of the *send* currency: 300 RWF, 3.00 GHS, 500.00 NGN.
+# NGN only applies to NG->RW, which stays disabled below.
+MIN_FEE_MINOR: dict[str, int] = {"RWF": 300, "GHS": 300, "NGN": 50_000}
 RATE_QUANTUM = Decimal("0.00000001")  # 8 dp
 
 # (from_country, to_country) -> None if enabled, otherwise the reason it is disabled.

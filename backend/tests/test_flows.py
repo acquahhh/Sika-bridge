@@ -127,6 +127,41 @@ def test_failed_payout_refunds_wallet(client):
     assert r.status_code == 409
 
 
+def test_agent_must_claim_before_failing(client):
+    student = auth(client, STUDENT_RW)
+    top_up(client, student, "20000")
+    quote = client.post("/quotes", json={"recv_country": "GH", "send_amount": "10000"}, headers=student).json()
+    t = client.post("/transfers", json={"quote_id": quote["id"], **RECIPIENT_GH}, headers=student).json()
+
+    agent = auth(client, AGENT_GH)
+    # Unclaimed payout: fail is refused and nothing is refunded.
+    r = client.post(f"/agent/payouts/{t['id']}/fail", json={"reason": "No answer"}, headers=agent)
+    assert r.status_code == 409
+    assert r.json()["detail"]["code"] == "invalid_state"
+    assert client.get(f"/transfers/{t['id']}", headers=student).json()["status"] == "PAYOUT_PENDING"
+    assert client.get("/wallet", headers=student).json()["balance"] == "10000"
+
+    # Claimed by another agent: also refused for this agent.
+    other = client.post(
+        "/auth/register",
+        json={"phone": "+233249999999", "password": "Secret123!", "full_name": "Other Agent", "country": "GH"},
+    ).json()
+    from app.models import User
+
+    with client.app.state.sessionmaker() as db:
+        db.get(User, other["user"]["id"]).role = "agent"
+        db.commit()
+    other_headers = {"Authorization": f"Bearer {other['access_token']}"}
+    assert client.post(f"/agent/payouts/{t['id']}/claim", headers=other_headers).status_code == 200
+    r = client.post(f"/agent/payouts/{t['id']}/fail", json={"reason": "No answer"}, headers=agent)
+    assert r.status_code == 409
+
+    # The holding agent can fail it, which refunds the sender.
+    r = client.post(f"/agent/payouts/{t['id']}/fail", json={"reason": "No answer"}, headers=other_headers)
+    assert r.status_code == 200 and r.json()["status"] == "REFUNDED"
+    assert client.get("/wallet", headers=student).json()["balance"] == "20000"
+
+
 def test_pool_too_small_returns_503(client):
     student = auth(client, STUDENT_RW)
     top_up(client, student, "6000000")
@@ -234,6 +269,8 @@ def test_money_math_is_exact():
             pass
     assert fx.compute_fee(1000, "GHS") == 300  # 10.00 GHS -> min fee 3.00
     assert fx.compute_fee(100_001, "RWF") == 1501  # 1500.015 rounded up
+    assert fx.compute_fee(1_000_000, "NGN") == 50_000  # 10,000.00 NGN -> min fee 500.00
+    assert fx.CORRIDORS[("NG", "RW")] is not None  # NG->RW stays disabled
     rate = fx.customer_rate("GHS", "RWF")
     assert str(rate) == "92.61290322"
     assert fx.convert(9700, "GHS", "RWF", rate) == 8983  # 97.00 GHS -> 8983.45 RWF, down
