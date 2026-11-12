@@ -201,7 +201,7 @@ export default function SendPage() {
               </Row>
             </dl>
             <div className="mt-2 flex items-baseline justify-between border-t border-slate-100 pt-3">
-              <span className="text-sm font-medium text-slate-600">They receive</span>
+              <span className="text-sm font-medium text-slate-600">Recipient gets</span>
               <span className="text-2xl font-bold tabular-nums text-emerald-800">
                 {formatMoney(quote.receive_amount, quote.recv_currency)}
               </span>
