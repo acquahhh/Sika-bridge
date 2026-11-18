@@ -9,6 +9,7 @@ no money crosses a border per transfer.
 | --- | --- |
 | [`backend/`](backend) | FastAPI + SQLAlchemy 2 API with a double-entry ledger |
 | [`frontend/`](frontend) | React PWA (see its own README) |
+| [`devbridge/`](devbridge) | DevBridge AI development workspace: React UI + local Node.js agent for Claude Code (separate project, see its README) |
 
 ## Backend quick start (Windows PowerShell)
 

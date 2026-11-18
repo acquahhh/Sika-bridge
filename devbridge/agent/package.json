@@ -1,0 +1,17 @@
+{
+  "name": "devbridge-agent",
+  "version": "0.1.0",
+  "description": "Local DevBridge agent: bridges the DevBridge web UI to Claude Code CLI, your workspace and dev servers on this computer.",
+  "type": "module",
+  "private": true,
+  "bin": { "devbridge-agent": "src/index.js" },
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "4.22.3",
+    "ws": "8.23.0"
+  }
+}

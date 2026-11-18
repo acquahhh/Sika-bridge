@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme='dark'] {
+  --bg: 9 12 22;
+  --panel: 14 18 32;
+  --raised: 21 26 44;
+  --line: 36 43 66;
+  --fg: 230 234 245;
+  --muted: 148 158 184;
+  --faint: 92 102 130;
+  --accent: 79 124 255;
+  --violet: 139 92 246;
+  --ok: 52 211 153;
+  --warn: 251 191 36;
+  --bad: 248 113 113;
+  color-scheme: dark;
+}
+
+[data-theme='midnight'] {
+  --bg: 4 6 12;
+  --panel: 9 11 20;
+  --raised: 15 18 30;
+  --line: 28 33 52;
+}
+
+[data-theme='light'] {
+  --bg: 246 247 251;
+  --panel: 255 255 255;
+  --raised: 240 242 248;
+  --line: 222 226 238;
+  --fg: 17 22 38;
+  --muted: 84 94 120;
+  --faint: 140 148 170;
+  --accent: 59 102 245;
+  --violet: 124 77 230;
+  --ok: 16 160 110;
+  --warn: 190 130 10;
+  --bad: 214 60 60;
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg font-sans text-fg antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.35);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line)) transparent;
+}
+
+.bg-grid {
+  background-image: radial-gradient(rgb(var(--line) / 0.6) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, rgb(var(--accent)), rgb(var(--violet)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
